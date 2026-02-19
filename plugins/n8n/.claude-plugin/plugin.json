@@ -1,5 +1,0 @@
-{
-  "name": "n8n",
-  "description": "Build, test, and deploy n8n workflows via REST API with incremental testing",
-  "version": "1.0.0"
-}
