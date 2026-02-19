@@ -1,0 +1,5 @@
+{
+  "name": "n8n-project-init",
+  "description": "Initialize new n8n automation projects with CLAUDE.md, .env, and conflict checks",
+  "version": "1.0.0"
+}
