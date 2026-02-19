@@ -1,0 +1,5 @@
+{
+  "name": "n8n-project-init",
+  "description": "Initialize new n8n projects with CLAUDE.md, .env, credential profile detection, and API verification",
+  "version": "1.1.0"
+}

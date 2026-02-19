@@ -1,0 +1,32 @@
+{
+  "name": "n8n-toolkit",
+  "owner": {
+    "name": "pattern-ai-automations"
+  },
+  "metadata": {
+    "description": "Pattern AI Automations team toolkit -- build, test, plan, and scaffold n8n workflows"
+  },
+  "plugins": [
+    {
+      "name": "n8n",
+      "source": "./plugins/n8n",
+      "description": "Build, test, and deploy n8n workflows via REST API with incremental testing",
+      "version": "1.1.0",
+      "keywords": ["n8n", "workflow", "automation", "api"]
+    },
+    {
+      "name": "n8n-prd-generator",
+      "source": "./plugins/n8n-prd-generator",
+      "description": "Convert discovery call transcripts into concise n8n Automation Blueprints with interactive question flow",
+      "version": "1.1.0",
+      "keywords": ["n8n", "blueprint", "prd", "discovery", "automation", "scoping"]
+    },
+    {
+      "name": "n8n-project-init",
+      "source": "./plugins/n8n-project-init",
+      "description": "Initialize new n8n projects with CLAUDE.md, .env, credential profile detection, and API verification",
+      "version": "1.1.0",
+      "keywords": ["n8n", "init", "scaffold", "project", "setup"]
+    }
+  ]
+}
