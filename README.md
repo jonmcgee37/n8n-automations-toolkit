@@ -56,7 +56,9 @@ git clone git@github.com:pattern-ai/n8n-automations-toolkit.git ~/claude-plugins
 /plugin install n8n-project-init@n8n-toolkit
 ```
 
-### Step 3: Set Up Shared n8n Credentials
+### Step 3: Set Up n8n Credentials
+
+**Single instance (most team members):**
 
 Create a file at `~/.n8n-team.env` with the shared instance credentials:
 
@@ -66,7 +68,26 @@ N8N_API_KEY=your-team-api-key
 N8N_CREDENTIALS_TEMPLATE_URL=https://pattern.app.n8n.cloud/workflow/TEMPLATE_ID
 ```
 
-The project init plugin will copy these into each new project's `.env` file automatically.
+**Multiple instances (if you manage more than one n8n environment):**
+
+Create a directory with one file per instance:
+
+```bash
+mkdir -p ~/.n8n-envs
+
+# Pattern instance
+cat > ~/.n8n-envs/pattern.env << 'EOF'
+N8N_API_URL=https://pattern.app.n8n.cloud
+N8N_API_KEY=pattern-api-key
+N8N_CREDENTIALS_TEMPLATE_URL=https://pattern.app.n8n.cloud/workflow/TEMPLATE_ID
+EOF
+
+# Add more as needed:
+# ~/.n8n-envs/behold.env
+# ~/.n8n-envs/sandbox.env
+```
+
+The project init plugin will detect both formats. If it finds named profiles in `~/.n8n-envs/`, it will ask you which instance the project targets. If it finds only `~/.n8n-team.env`, it uses that directly.
 
 ### Step 4: Verify
 

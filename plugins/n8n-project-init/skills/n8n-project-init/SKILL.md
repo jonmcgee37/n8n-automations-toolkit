@@ -58,22 +58,41 @@ Ask the user for the following (collect everything in one prompt using the AskUs
 Before asking for credentials, check these locations in order:
 
 ```bash
-# 1. Shared team credentials file
+# 1. Check for named instance profiles (supports multiple n8n instances)
+ls ~/.n8n-envs/*.env 2>/dev/null
+
+# 2. Fall back to single shared team credentials file
 cat ~/.n8n-team.env 2>/dev/null
 
-# 2. Existing .env in a sibling project directory
+# 3. Existing .env in a sibling project directory
 find .. -maxdepth 2 -name '.env' -path '*n8n*' 2>/dev/null | head -1 | xargs cat 2>/dev/null
 
-# 3. Environment variables already set
+# 4. Environment variables already set
 echo $N8N_API_URL
 ```
 
-If credentials are found, confirm with the user: "I found your n8n instance at [URL] — want to use the same credentials for this project?"
+**If multiple instance profiles exist in `~/.n8n-envs/`:**
+- List the available profiles by name (filename without `.env` extension)
+- Ask the user which instance this project should target
+- Example: "I found 3 n8n instances configured: `pattern`, `behold`, `sandbox`. Which one is this project for?"
+- Load the selected profile's credentials
 
-If no credentials are found, ask for:
+**Instance profile format** (`~/.n8n-envs/<instance-name>.env`):
+```
+N8N_API_URL=https://instance-name.app.n8n.cloud
+N8N_API_KEY=the-api-key
+N8N_CREDENTIALS_TEMPLATE_URL=https://instance-name.app.n8n.cloud/workflow/TEMPLATE_ID
+```
+
+**If only `~/.n8n-team.env` exists (single instance):**
+- Use those credentials directly
+- Confirm with the user: "I found your n8n instance at [URL] — want to use the same credentials for this project?"
+
+**If no credentials are found at all**, ask for:
 - **n8n instance URL** (e.g., `https://pattern.app.n8n.cloud`)
 - **n8n API key**
 - **Credentials template workflow URL**
+- Offer to save them: "Want me to save these as a profile at `~/.n8n-envs/<name>.env` for future projects?"
 
 **Optional (ask only if relevant):**
 - **Blueprint** — Has a blueprint already been generated? If so, ask them to paste it.
