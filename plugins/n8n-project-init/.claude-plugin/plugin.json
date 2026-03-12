@@ -1,5 +1,5 @@
 {
   "name": "n8n-project-init",
-  "description": "Initialize new n8n projects with CLAUDE.md, .env, credential profile detection, and API verification",
-  "version": "1.1.0"
+  "description": "Scaffold new n8n automation projects for the Pattern team — verifies Pattern credentials, pulls in the PRD blueprint, creates CLAUDE.md and .env, verifies API connection, and hands off to the n8n builder",
+  "version": "1.2.0"
 }

@@ -11,7 +11,7 @@
 
 ## n8n Instance
 
-- **Instance URL:** {{N8N_API_URL}}
+- **Instance URL:** https://pattern.app.n8n.cloud
 - **Credentials Template:** {{N8N_CREDENTIALS_TEMPLATE_URL}}
 - **Workflow ID:** _(filled in after creation)_
 - **Webhook URL:** _(filled in after creation)_
@@ -67,7 +67,7 @@ _(What was tested, edge cases verified, known limitations)_
 
 ## Blueprint Reference
 
-_(If a blueprint was generated from the PRD generator, paste it here or link to it)_
+_(Paste the blueprint from the PRD generator here)_
 
 ---
 
@@ -76,7 +76,6 @@ _(If a blueprint was generated from the PRD generator, paste it here or link to 
 - API credentials stored in `.env` (never committed to git)
 - The n8n plugin reads `.env` automatically for all API calls
 - Credentials template contains pre-configured node auth — always pull from there
-- See `.env.template` for required variables
 
 ---
 

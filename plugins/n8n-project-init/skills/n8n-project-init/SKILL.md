@@ -2,104 +2,127 @@
 name: n8n-project-init
 description: |
   Initialize a new n8n automation project for the Pattern AI Automations team.
+  Scaffolds the project directory with CLAUDE.md, .env, and .gitignore — using
+  Pattern instance credentials and an existing blueprint from the PRD generator.
 
   USE THIS SKILL WHEN:
   - User says "/n8n-init", "/init-n8n", or "/new-project"
-  - User says "start a new n8n project", "set up a new automation", "new project"
+  - User says "start a new n8n project", "set up a new automation", "initialize project"
   - User wants to scaffold a new n8n build directory with team standards
   - User asks to create the CLAUDE.md or .env for an n8n project
+  - User has finished the PRD generator and is ready to scaffold before building
 ---
 
 # n8n Project Initializer
 
-Scaffold a new automation project for the Pattern AI Automations team with standardized configuration, shared credentials, and project context.
+Scaffold a new n8n automation project for the Pattern AI Automations team. This is **Step 2 of 3** in the build pipeline:
 
-## Trigger
-
-Use this skill when:
-- User says `/n8n-init`, `/init-n8n`, or `/new-project`
-- User says "start a new n8n project", "set up a new automation"
-- User wants to create a new project directory for an n8n workflow build
-
----
-
-## Step 1: Locate the Plugin Root
-
-The project template files live in this plugin's repository. Find them:
-
-```bash
-TOOLKIT_ROOT="${CLAUDE_PLUGIN_ROOT:-$(find ~/claude-plugins -name 'CLAUDE.md.template' -path '*/project-template/*' 2>/dev/null | head -1 | xargs dirname)}"
+```
+[Step 1] PRD Generator  →  [Step 2] Project Init  →  [Step 3] n8n Builder
 ```
 
-If the template files cannot be found, generate them inline using the formats documented in Step 4 below.
-
 ---
 
-## Step 2: Gather Project Info and Credentials
+## Step 1: Verify Pattern Credentials
 
-### CRITICAL: Check for n8n credential profiles FIRST
-
-**Before asking the user ANY questions, run this command:**
+Run this command to check for the team credentials file:
 
 ```bash
-ls ~/.n8n-envs/*.env 2>/dev/null && echo "PROFILES_FOUND" || echo "NO_PROFILES"
+cat ~/.n8n-team.env 2>/dev/null
 ```
 
-**If output contains PROFILES_FOUND:**
-1. List the available profile names:
-   ```bash
-   ls ~/.n8n-envs/*.env | xargs -I{} basename {} .env
-   ```
-2. Ask the user which n8n instance this project targets. Present the profile names as selectable options (e.g., "pattern", "behold", "sandbox").
-3. Load the selected profile:
-   ```bash
-   cat ~/.n8n-envs/<selected-name>.env
-   ```
-4. **DO NOT ask the user for credentials. They are already in the profile. Move on to asking for project details.**
+**If the file exists and contains values:**
+- Confirm with the user: "Using Pattern n8n instance at `https://pattern.app.n8n.cloud` — correct?"
+- Load `N8N_API_URL`, `N8N_API_KEY`, and `N8N_CREDENTIALS_TEMPLATE_URL` from the file
+- Proceed to Step 2
 
-**If output contains NO_PROFILES:**
-1. Check for a single team credentials file:
-   ```bash
-   cat ~/.n8n-team.env 2>/dev/null
-   ```
-2. If found with populated values, use those credentials. Confirm with the user: "Using n8n instance at [URL] -- correct?"
-3. If not found or empty, ask the user to provide:
-   - n8n instance URL (e.g., `https://pattern.app.n8n.cloud`)
-   - n8n API key
-   - Credentials template workflow URL
-4. Offer to save: "Want me to save these as a profile at ~/.n8n-envs/<name>.env for future projects?"
+**If the file is missing or empty:**
+- Stop immediately and tell the user:
 
-### Then ask for project details
+> "Your Pattern credentials file (`~/.n8n-team.env`) is missing or empty. Before initializing a project, you need to set this up.
+>
+> Ask Jon for the three credential values (N8N_API_URL, N8N_API_KEY, N8N_CREDENTIALS_TEMPLATE_URL), then run:
+>
+> ```bash
+> cat > ~/.n8n-team.env << 'EOF'
+> N8N_API_URL=https://pattern.app.n8n.cloud
+> N8N_API_KEY=PASTE_YOUR_KEY_HERE
+> N8N_CREDENTIALS_TEMPLATE_URL=PASTE_TEMPLATE_URL_HERE
+> EOF
+> ```
+>
+> Once that's done, come back and run the project initializer again."
 
-Collect the following (use AskUserQuestion tool where possible):
-
-**Required:**
-1. **Project name** -- kebab-case directory name (e.g., `lead-enrichment-workflow`)
-2. **Brief description** -- One sentence: what does this automation do?
-3. **Your name** -- Who is building this? (team member name)
-4. **Stakeholder** -- Who requested this? (name and team, e.g., "Sarah Chen, RevOps")
-
-**Optional (ask only if relevant):**
-- **Blueprint** -- Has a blueprint already been generated? If so, ask them to paste it.
-- **Specific nodes/services** -- Any services they already know they will need
+Do not proceed until credentials are confirmed.
 
 ---
 
-## Step 3: Create Project Directory
+## Step 2: Check for Blueprint
+
+Before collecting project details, check whether a blueprint was already generated.
+
+Run:
+
+```bash
+ls *.md 2>/dev/null
+```
+
+**If a `.md` file is found in the current directory:**
+- Ask: "I see a markdown file here — is this your PRD blueprint? If so, I'll pull it into the project automatically."
+- If yes, read it and use it in Step 4c
+
+**If no `.md` file is found:**
+- Ask using AskUserQuestion:
+
+```
+Question: "Do you have a blueprint from the PRD generator?"
+Header: "Blueprint"
+Options:
+  - "Yes — I'll paste it now"
+  - "No — skip for now, I'll add it later"
+  - "No — take me back to the PRD generator first"
+```
+
+- If they choose "take me back to PRD generator": stop and say "Run the PRD generator first (`Generate an automation blueprint`) and come back when your blueprint is ready."
+- If they paste a blueprint: use it in Step 4c
+- If they skip: proceed without it, leave the Blueprint Reference section blank in CLAUDE.md
+
+---
+
+## Step 3: Collect Project Details
+
+Use AskUserQuestion tool to gather:
+
+**First call (2 questions):**
+- "What is the project name?" — kebab-case (e.g., `lead-enrichment-workflow`, `slack-approval-bot`)
+  Header: "Project Name"
+  Options: free text — remind them to use kebab-case
+- "One sentence: what does this automation do?"
+  Header: "Description"
+  Options: free text
+
+**Second call (2 questions):**
+- "Who is building this?" (team member name)
+  Header: "Builder"
+  Options: free text
+- "Who requested this, and what team are they on?" (e.g., "Sarah Chen, RevOps")
+  Header: "Stakeholder"
+  Options: free text
+
+---
+
+## Step 4: Create Project Files
+
+### 4a: Create directory
 
 ```bash
 mkdir -p <project-name>
-cd <project-name>
 ```
 
----
-
-## Step 4: Copy and Populate Template Files
-
-### 4a: .gitignore
+### 4b: .gitignore
 
 ```bash
-cat > .gitignore << 'EOF'
+cat > <project-name>/.gitignore << 'EOF'
 .env
 .env.*
 !.env.template
@@ -108,100 +131,103 @@ Thumbs.db
 .vscode/settings.json
 .idea/
 node_modules/
-.next/
-dist/
-build/
 *.log
-npm-debug.log*
 tmp/
 temp/
 EOF
 ```
 
-### 4b: .env
+### 4c: .env
 
-Use the credentials loaded from the profile (Step 2). Write them into the project .env:
+Write the Pattern credentials into the project `.env`:
 
-```bash
-cat > .env << EOF
+```
 # ============================================
-# Pattern AI Automations -- n8n Configuration
+# Pattern AI Automations — n8n Configuration
 # ============================================
 # NEVER commit this file to git
 # ============================================
 
-# n8n Instance
-N8N_API_URL=${N8N_API_URL}
-N8N_API_KEY=${N8N_API_KEY}
-
-# Credentials Template
-N8N_CREDENTIALS_TEMPLATE_URL=${N8N_CREDENTIALS_TEMPLATE_URL}
+N8N_API_URL=https://pattern.app.n8n.cloud
+N8N_API_KEY=<value from ~/.n8n-team.env>
+N8N_CREDENTIALS_TEMPLATE_URL=<value from ~/.n8n-team.env>
 
 # ============================================
-# Project-Specific Variables
+# Project-Specific Variables (add as needed)
 # ============================================
-# Add as needed during the build:
 # WEBHOOK_PATH=
 # SLACK_CHANNEL=
 # GOOGLE_SHEET_ID=
-EOF
 ```
 
-### 4c: CLAUDE.md
+### 4d: CLAUDE.md
 
-Create the CLAUDE.md with all placeholder values replaced:
+Create CLAUDE.md with all placeholders replaced:
 
-| Placeholder | Replace With |
-|-------------|-------------|
-| `{{PROJECT_NAME}}` | Project name from Step 2 |
-| `{{PROJECT_DESCRIPTION}}` | Brief description from Step 2 |
+| Placeholder | Value |
+|-------------|-------|
+| `{{PROJECT_NAME}}` | Project name from Step 3 |
+| `{{PROJECT_DESCRIPTION}}` | Description from Step 3 |
 | `{{DATE}}` | Today's date (YYYY-MM-DD) |
-| `{{TEAM_MEMBER_NAME}}` | Builder's name from Step 2 |
-| `{{STAKEHOLDER_NAME}}` | Stakeholder name from Step 2 |
-| `{{STAKEHOLDER_TEAM}}` | Stakeholder team from Step 2 |
-| `{{N8N_API_URL}}` | n8n instance URL from loaded credentials |
-| `{{N8N_CREDENTIALS_TEMPLATE_URL}}` | Credentials template URL from loaded credentials |
+| `{{TEAM_MEMBER_NAME}}` | Builder name from Step 3 |
+| `{{STAKEHOLDER_NAME}}` | Stakeholder name from Step 3 |
+| `{{STAKEHOLDER_TEAM}}` | Stakeholder team from Step 3 |
+| `{{N8N_CREDENTIALS_TEMPLATE_URL}}` | From `~/.n8n-team.env` |
 
-If a blueprint was provided, paste it into the "Blueprint Reference" section.
-If specific nodes/services were mentioned, pre-populate the "Node-Specific Credentials" table.
+**If a blueprint was provided in Step 2:** paste it verbatim into the "Blueprint Reference" section.
+**If not:** leave the section with the placeholder note.
 
 ---
 
 ## Step 5: Verify API Connection
 
 ```bash
-export $(cat .env | grep -v '^#' | xargs) && curl -s "${N8N_API_URL}/api/v1/workflows?limit=1" -H "X-N8N-API-KEY: ${N8N_API_KEY}" | jq '.data | length'
+export $(cat <project-name>/.env | grep -v '^#' | xargs) && \
+curl -s "${N8N_API_URL}/api/v1/workflows?limit=1" \
+  -H "X-N8N-API-KEY: ${N8N_API_KEY}" | jq '.data | length'
 ```
 
-- Returns a number: connection is working
-- Fails: help troubleshoot (wrong URL, bad API key, network issue)
+- Returns a number → connection confirmed
+- Fails → help troubleshoot: confirm URL is `https://pattern.app.n8n.cloud`, verify API key matches `~/.n8n-team.env`, check network
 
 ---
 
-## Step 6: Report to User
+## Step 6: Report and Hand Off to Builder
 
 ```
 Project initialized: <project-name>/
 
 Files created:
-  - CLAUDE.md       (project context -- update as you build)
-  - .env            (n8n credentials -- never commit)
-  - .gitignore      (protects .env from git)
+  ✓ CLAUDE.md       — project context (update as you build)
+  ✓ .env            — Pattern credentials (never commit)
+  ✓ .gitignore      — protects .env from git
 
-n8n instance: <instance-name> (<N8N_API_URL>)
+n8n instance: Pattern (https://pattern.app.n8n.cloud)
 API connection: verified
+Blueprint: <included / not included>
+```
 
-Next steps:
-  1. Describe your workflow (or paste the blueprint)
-  2. The n8n plugin will build incrementally: one node, test, next node, test
-  3. Update CLAUDE.md as you go with architecture decisions and notes
+Then output the next step callout:
+
+```
+─────────────────────────────────────────────
+NEXT STEP: Build the workflow
+
+Your project is scaffolded and ready. To start building, say:
+
+  "Build the workflow for <project-name>"
+
+The n8n builder will implement the workflow node by node using the
+blueprint in CLAUDE.md, testing after each step before moving on.
+─────────────────────────────────────────────
 ```
 
 ---
 
 ## Important Notes
 
-- **Never put real API keys in CLAUDE.md** -- they go in `.env` only
-- **Always verify the API connection** -- catch auth issues before building starts
-- **The CLAUDE.md tracks project state** -- encourage the builder to update it as decisions are made
-- **If the user already has a blueprint**, incorporate it into CLAUDE.md automatically
+- **Pattern instance only** — this plugin is configured for `pattern.app.n8n.cloud`. Do not modify for other instances.
+- **Never put API keys in CLAUDE.md** — credentials live in `.env` only
+- **Always run the PRD generator first** — a blueprint makes the build phase significantly faster and more accurate
+- **Verify the API connection every time** — catch auth issues before building starts
+- **CLAUDE.md is a living doc** — encourage the builder to update it with decisions, issues, and test notes as they build
