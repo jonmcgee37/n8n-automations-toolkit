@@ -10,8 +10,8 @@
     {
       "name": "n8n",
       "source": "./plugins/n8n",
-      "description": "Build, test, and deploy n8n workflows via REST API with incremental testing",
-      "version": "1.1.0",
+      "description": "Build, test, and deploy n8n workflows via REST API with incremental testing. Step 3 of 3 in the Pattern build pipeline — reads CLAUDE.md blueprint, builds node by node, then prompts for error handling setup on completion",
+      "version": "1.2.0",
       "keywords": ["n8n", "workflow", "automation", "api"]
     },
     {

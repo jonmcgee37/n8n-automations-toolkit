@@ -2,24 +2,32 @@
 name: n8n
 description: |
   Build, test, and deploy n8n workflows via REST API with incremental testing. Expert automation for n8n.
+  This is Step 3 of 3 in the Pattern AI Automations build pipeline.
 
   USE THIS SKILL WHEN:
-  - User says "create workflow", "build automation", "deploy to n8n", "activate workflow"
+  - User says "create workflow", "build automation", "deploy to n8n", "activate workflow", "build the workflow"
   - User needs to list, update, delete, or test workflows
   - User mentions webhook execution, checking executions, debugging workflow runs
   - User asks about n8n nodes, expressions, credentials, or Code nodes
   - User needs JavaScript or Python code for n8n Code nodes
   - User mentions {{ }} expressions, $json, $input, or $node references
   - User asks about AI Agent, OpenAI, Anthropic, Google Sheets, Airtable, Slack, or other n8n nodes
+  - User has completed n8n-project-init and is ready to build
 ---
 
-# n8n Automation Skill
+# n8n Automation Builder
 
 Build, test, and deploy n8n workflows via REST API with incremental testing.
 
+This is **Step 3 of 3** in the build pipeline:
+
+```
+[Step 1] PRD Generator  →  [Step 2] Project Init  →  [Step 3] n8n Builder  ← YOU ARE HERE
+```
+
 ---
 
-## When This Skill Loads (DO THIS IMMEDIATELY)
+## When This Skill Loads (DO THIS IMMEDIATELY — IN ORDER)
 
 ### Step 1: Read Reference Files
 ```
@@ -28,7 +36,29 @@ Use the Read tool to read these files NOW:
 2. Read references/build-process.md (step-by-step build workflow)
 ```
 
-### Step 2: Check .env Configuration
+### Step 2: Load Project Context
+
+Read the project's `CLAUDE.md` file in the current working directory:
+
+```
+Read CLAUDE.md
+```
+
+Extract and hold in context:
+- **Project name and description**
+- **Stakeholder** — who this is for
+- **n8n instance URL** — confirm it matches `.env`
+- **Blueprint Reference section** — this is the build spec. If a blueprint is present, it defines the trigger, inputs, core steps, outputs, rules, and error handling requirements. Use it as the primary guide for the entire build.
+- **Planned Workflow Steps** — use the node sequence if defined
+- **Node-Specific Credentials table** — use to pre-select credential types
+
+If `CLAUDE.md` is missing:
+> "I don't see a CLAUDE.md in this directory. This project may not have been initialized. Run `Set up a new n8n project` first, then come back to build."
+
+If `CLAUDE.md` exists but the Blueprint Reference section is empty:
+> "There's no blueprint in CLAUDE.md. You can paste your blueprint now and I'll use it as the build spec, or describe the workflow and I'll proceed from your description."
+
+### Step 3: Check .env Configuration
 ```
 Read the .env file in the working directory to verify:
 - N8N_API_URL is set
@@ -36,14 +66,23 @@ Read the .env file in the working directory to verify:
 - N8N_CREDENTIALS_TEMPLATE_URL is set
 ```
 
-If any values are missing, ask the user for ALL of them in a single prompt.
+If any values are missing, stop and tell the user to run the project initializer first.
 
-### Step 3: Create a Todo List
+### Step 4: Confirm Build Spec and Create Todo List
 
-After understanding the user's request, create a todo list using TaskCreate.
+Briefly confirm what you're about to build based on the blueprint:
+
+> "Ready to build: **[Project Name]**
+> Trigger: [trigger type]
+> Steps: [count] nodes
+> Output: [destination]
+>
+> Building node by node with testing after each step. Starting now."
+
+Then create a todo list with one item per node/major step from the blueprint.
 
 ```
-SKILL LOADS -> READ FILES IMMEDIATELY -> CHECK .env -> THEN respond to user
+SKILL LOADS -> READ REFS -> READ CLAUDE.md -> CHECK .env -> CONFIRM SPEC -> BUILD
 ```
 
 ---
@@ -338,26 +377,104 @@ curl "${N8N_API_URL}/api/v1/executions/{id}?includeData=true" | jq '.data.result
 
 ---
 
-## What to Report to User
+## Build Complete: What to Report
 
-**After successful build:**
+**After all nodes are built and tested, output a structured summary:**
+
 ```
-Build Progress:
-1. Webhook trigger - working
-2. HTTP Request - working (2 results)
-3. Google Sheets - working
+─────────────────────────────────────────────
+BUILD COMPLETE — <Project Name>
+─────────────────────────────────────────────
+Workflow:  <workflow name>
+Status:    Active
+URL:       https://pattern.app.n8n.cloud/workflow/<id>
 
-- Workflow: My Workflow
-- URL: https://n8n.example.com/workflow/abc123
-- Status: Active
+Nodes built and tested:
+  ✓ [Trigger type] — working
+  ✓ [Node 2 name] — working (N results)
+  ✓ [Node 3 name] — working
+  ...
+
+Output: <what was created/sent/updated>
+─────────────────────────────────────────────
 ```
 
-**If manual config needed:**
+**If any node requires manual configuration in the UI:**
 ```
-Workflow built and partially tested!
+Manual setup required:
+  • [Node name]: [exactly what the user needs to do in the UI]
+```
 
-Google Sheets requires manual setup:
-- Open workflow in n8n UI
-- Select your spreadsheet
-- Save
+---
+
+## Error Handling Setup (Ask After Every Build)
+
+After reporting build complete, always ask about error handling using AskUserQuestion:
+
+**First question:**
+```
+Question: "Do you want to add error handling to this workflow?"
+Header: "Error Handling"
+Options:
+  - "Yes — attach an existing error workflow"
+  - "Yes — create a new error workflow for this project"
+  - "No — skip for now"
+```
+
+**If "attach an existing error workflow":**
+- Ask: "What is the name or workflow ID of the error handling workflow?"
+- Fetch the workflow by name/ID to confirm it exists
+- Set it as the error workflow on the current workflow using the n8n API:
+  ```bash
+  # Update workflow settings to attach error workflow
+  PUT /api/v1/workflows/{id}
+  # Set settings.errorWorkflow to the error workflow ID
+  ```
+- Confirm: "Error workflow `<name>` attached."
+
+**If "create a new error workflow":**
+- Ask using AskUserQuestion:
+  ```
+  Question: "How should the error alert be sent?"
+  Header: "Alert Channel"
+  Options:
+    - "Slack"
+    - "Gmail"
+    - "Both Slack and Gmail"
+  ```
+- Then ask for the destination:
+  - Slack: "Which Slack channel? (e.g., #automation-alerts)"
+  - Gmail: "Which email address should receive error alerts?"
+- Build a minimal error handling workflow:
+  1. **Error Trigger** node (`n8n-nodes-base.errorTrigger`)
+  2. **Notification node** (Slack and/or Gmail) with this message format:
+     ```
+     ❌ Workflow Error: {{ $json.workflow.name }}
+     Error: {{ $json.execution.error.message }}
+     Execution: https://pattern.app.n8n.cloud/execution/{{ $json.execution.id }}
+     ```
+  3. Activate the error workflow
+  4. Attach it to the main workflow via API
+- Report: "Error workflow created and attached. Alerts will go to [destination]."
+
+**If "skip for now":**
+- Acknowledge and move on. Do not ask again.
+
+---
+
+## Final Wrap-Up
+
+After build complete and error handling decision, output:
+
+```
+─────────────────────────────────────────────
+DONE — <Project Name> is live on Pattern n8n
+
+Update your CLAUDE.md status checklist:
+  ✓ Workflow built and tested
+  ✓ Error handling: <added / skipped>
+  □ Stakeholder review
+  □ Activated in production (if not already)
+  □ Documentation complete
+─────────────────────────────────────────────
 ```
