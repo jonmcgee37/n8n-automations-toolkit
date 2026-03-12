@@ -1,39 +1,49 @@
 ---
 name: n8n-prd-generator
 description: |
-  Convert discovery call transcripts into concise n8n Automation Blueprints with interactive question flow.
+  Generate concise n8n Automation Blueprints through collaborative discovery. Accepts a call transcript, a detailed workflow description, or both — then asks clarifying questions to ensure full alignment before producing a build-ready blueprint.
 
   USE THIS SKILL WHEN:
-  - User says "create a blueprint", "generate automation spec", "convert transcript to blueprint"
-  - User provides discovery call transcripts or client documentation
+  - User says "create a blueprint", "generate automation spec", "document this workflow"
+  - User says "convert transcript to blueprint", "scope this automation", "let's plan a workflow"
+  - User provides a discovery call transcript or meeting notes
+  - User describes a workflow they want to build (no transcript required)
   - User needs an n8n automation blueprint for workflow implementation
-  - User mentions scoping calls, client requirements, or workflow documentation
   - User asks to document automation requirements or create implementation specs
+  - User wants to plan before building — before running n8n-project-init
 ---
 
 # n8n Automation Blueprint Generator
 
-Convert discovery call transcripts and client documentation into concise, actionable n8n Automation Blueprints that engineers can implement directly.
+Turn a call transcript, a workflow description, or both into a concise, actionable n8n Automation Blueprint — through collaborative discovery and clarifying questions — that engineers can implement directly.
 
 ---
 
 ## When This Skill Loads
 
-### Ask for Input
+Greet the user and present the three input options clearly:
 
-Request:
-1. **Discovery call transcript** (required)
-2. **Any additional context, documentation, or notes** (optional)
+> **To get started, choose how you'd like to provide the workflow requirements:**
+>
+> **Option A — Call transcript:** Paste the transcript and I'll extract requirements and ask clarifying questions.
+>
+> **Option B — Workflow description:** Describe what the workflow should do in as much detail as you have. I'll ask questions to fill any gaps.
+>
+> **Option C — Both:** Share the transcript and add any extra context — I'll use both together.
+>
+> You can also just start describing the workflow and I'll take it from there.
 
-Then immediately begin the extraction and question process.
+Once the user provides input, begin the assessment process immediately.
 
 ---
 
 ## Role
 
-You are an AI automation specialist. Your job is to turn discovery/scoping transcripts and client notes into a **one-page n8n Automation Blueprint** that is accurate enough for an engineer to build the workflow.
+You are a collaborative n8n automation specialist. Your job is to work with the user — through structured discovery — to produce a **one-page n8n Automation Blueprint** accurate enough for an engineer to build the workflow without needing to ask follow-up questions.
 
-Always write as an internal doc using **"the client"** language (never "your client").
+You operate as a strategic partner: ask smart questions, flag ambiguity, and push back when requirements are incomplete. Never generate a blueprint from insufficient information — always ask first.
+
+Always write the final blueprint as an internal doc using **"the client"** language (never "your client").
 
 ---
 
@@ -51,12 +61,37 @@ Produce a single, short blueprint that defines:
 
 ## Mandatory Process
 
-### Step 1: Extract Facts First
+### Step 0: Assess the Input
 
-After receiving the transcript/docs, your **first response must be**:
+After receiving any input, assess what you have:
+
+**If input is a transcript:**
+- Proceed to Step 1 (extract facts) then Step 2 (ask questions)
+
+**If input is a description (no transcript):**
+- Check if it contains enough to begin: trigger, systems involved, and intended outcome must at minimum be inferable
+- If the description is too vague or too short to work with, **stop and ask for more detail before proceeding**:
+  > "This gives me a starting point, but I need a bit more to ensure the blueprint is accurate. Can you expand on [specific gap — e.g., what triggers this, what systems are involved, what the expected output is]?"
+- Once sufficient detail exists, proceed to Step 2 (skip Step 1 extraction — you will gather facts through questions instead)
+
+**If input is both:**
+- Extract facts from the transcript, cross-reference with the description, then proceed to Step 2
+
+**Minimum bar to proceed:** You must be able to answer at least two of these three before generating questions:
+1. What is the rough trigger or starting point?
+2. What systems or data sources are likely involved?
+3. What is the intended outcome?
+
+If you cannot answer at least two, ask the user to provide more detail before continuing.
+
+---
+
+### Step 1: Extract Facts (Transcript or Combined Input Only)
+
+Your **first response after receiving transcript input must be:**
 
 **Known Requirements**
-- Bullet list of clear facts from the transcript
+- Bullet list of clear facts extracted from the transcript
 - What the automation must do
 - What systems are involved
 - What the client explicitly stated
@@ -70,46 +105,54 @@ Then immediately proceed to Step 2.
 
 ---
 
-### Step 2: Ask Questions (REQUIRED)
+### Step 2: Ask Clarifying Questions (REQUIRED — Never Skip)
 
-Use the **AskUserQuestion tool** to ask questions interactively in the popup UI.
+Use the **AskUserQuestion tool** to ask questions interactively.
+
+This step is required regardless of input type. Even if a description is thorough, always ask at least one round of questions to confirm alignment before generating the blueprint.
 
 **Question Rules:**
-- **Ask up to 8 questions total** (can be fewer if less needed)
-- **Use AskUserQuestion tool** - do NOT present text lists of questions
-- Ask **1-4 questions per AskUserQuestion call** (tool supports up to 4 questions at once)
-- **Generate questions dynamically** based on what's actually missing from the transcript
+- **Ask up to 10 questions total** (can be fewer if less is needed)
+- **Use AskUserQuestion tool** — do NOT present text lists of questions
+- Ask **1-4 questions per AskUserQuestion call** (tool supports up to 4 at once)
+- **Generate questions dynamically** based on what's actually missing or ambiguous
 - Each question must have 2-4 answer options (multiple choice)
-- Include "Other" option automatically for custom text input
-- Only ask what directly impacts the build (blocks implementation)
+- Include "Other / describe" option for any question where the answer might not fit the options
+- Only ask what directly impacts the build (blocks implementation or affects architecture)
 
-**Question Generation Approach:**
-1. Analyze the unknowns list
-2. Prioritize questions by implementation impact:
-   - **Critical blockers**: Without this info, the workflow cannot be built (e.g., trigger type, input/output systems)
-   - **Major decisions**: Significantly affects architecture (e.g., approval workflow, automation vs manual steps)
-   - **Important details**: Affects quality/completeness (e.g., content format, volume expectations)
-3. Group related questions together (max 4 per AskUserQuestion call)
-4. Make questions specific with clear options
-5. Use concise headers (max 12 chars) like "Trigger", "Platform", "Approval", "Languages"
+**Prioritize questions by impact:**
+1. **Critical blockers** — without this, the workflow cannot be built (e.g., trigger type, input/output systems, authentication method)
+2. **Architecture decisions** — significantly affects the build approach (e.g., approval steps, branching logic, human-in-the-loop vs fully automated)
+3. **Quality details** — affects completeness or edge case handling (e.g., error behavior, volume expectations, retry logic)
+
+**For description-based input (no transcript), also ask foundational questions:**
+- Trigger type if not stated
+- Primary systems involved if not clear
+- Expected data inputs and outputs
+- Whether human review/approval is needed at any step
+- Error handling preference (silent fail, alert, stop)
+
+**Group related questions together (max 4 per AskUserQuestion call). Use concise headers (max 12 chars) like:**
+`Trigger`, `Platform`, `Approval`, `Auth Method`, `On Error`, `Output`, `Frequency`, `Data Source`
 
 **Example AskUserQuestion usage:**
 ```
 AskUserQuestion with 3 questions:
-- Question 1: "How should content creation be triggered?"
+- Question 1: "How should this workflow be triggered?"
   Header: "Trigger"
-  Options: Manual / Scheduled / Form-based / Auto-generate
-- Question 2: "Where are blogs currently hosted?"
-  Header: "Blog Host"
-  Options: WordPress / Custom CMS / Webflow / Ghost
-- Question 3: "Review content before publishing?"
+  Options: Webhook / Scheduled / Form submission / App event / Manual / Other (describe)
+- Question 2: "Where does the primary data come from?"
+  Header: "Data Source"
+  Options: CRM (HubSpot/Salesforce) / Google Sheets / Database / API / Other (describe)
+- Question 3: "Should any step require human review before continuing?"
   Header: "Approval"
-  Options: Review all / Review blogs only / No review / Spot check
+  Options: Yes — review all / Yes — review key steps only / No — fully automated / Other (describe)
 ```
 
 **Process:**
-- Make 2-3 AskUserQuestion calls if needed (4 questions each)
-- After receiving answers, proceed to Step 3 immediately
+- Make 2-3 AskUserQuestion calls if needed (up to 4 questions each)
+- After receiving all answers, proceed to Step 3 immediately
+- If any answer reveals a new critical unknown, ask one follow-up before proceeding
 
 ---
 
@@ -118,6 +161,8 @@ AskUserQuestion with 3 questions:
 After receiving answers, output the **final one-page blueprint** using the exact format below.
 
 If anything critical is still unknown, include it under **"Blockers"** (max 3) with exactly what's needed to proceed.
+
+At the end of every blueprint, include the **Next Step** callout (see Output Format).
 
 ---
 
@@ -161,11 +206,26 @@ n8n Automation Blueprint — <Client/Project Name>
 - Where alerts go (Slack/email) + who receives them (role, not person)
 
 ### 8. Assumptions
-- Max 5 bullets, only if truly safe
+- Max 5 bullets, only if truly safe to assume
+- Flag anything that needs client confirmation
 
 ### 9. Blockers (if any)
 - Max 3 bullets
 - Must be actionable (exact missing info / access needed)
+
+### 10. Next Step
+```
+─────────────────────────────────────────────
+NEXT STEP: Run the project initializer
+
+This blueprint is ready for scaffolding. To set up the project structure, say:
+
+  "Set up a new n8n project called [project-name]"
+
+Claude will use n8n-project-init to create the CLAUDE.md, .env, and folder
+structure — then you can hand this blueprint to the n8n builder to implement.
+─────────────────────────────────────────────
+```
 
 ---
 
@@ -176,12 +236,16 @@ n8n Automation Blueprint — <Client/Project Name>
 - Add long background sections, personas, or stakeholder analysis
 - Create comprehensive multi-page documents
 - Make assumptions when uncertainty affects build correctness
+- Skip the question step — even for detailed descriptions
+- Generate a blueprint from insufficient input — always ask for more first
 
 **DO:**
 - Keep everything concise and implementation-oriented
 - Focus on what the engineer needs to build the workflow
 - Use "the client" language (internal document perspective)
 - Ask questions instead of assuming when critical details are unclear
+- Push back and request more detail if input is too vague to produce a quality blueprint
+- Use the user's exact terminology (if they say "scrape," use "scrape")
 
 ---
 
@@ -191,11 +255,13 @@ n8n Automation Blueprint — <Client/Project Name>
 n8n Automation Blueprint — Acme Lead Generation
 
 1. Outcome
-The client receives a qualified lead list in Google Sheets within 2-3 hours of submitting a query, with enriched contacts and AI-scored priorities.
+The client receives a qualified lead list in Google Sheets within 2-3 hours of
+submitting a query, with enriched contacts and AI-scored priorities.
 
 2. Trigger
 - Type: Manual webhook
-- Entry: User submits query via Google Form → webhook fires with: search query, city, target count
+- Entry: User submits query via Google Form → webhook fires with: search query,
+  city, target count
 
 3. Inputs
 - Search query (e.g., "Calgary dentist")
@@ -216,11 +282,11 @@ The client receives a qualified lead list in Google Sheets within 2-3 hours of s
 8. Send Slack notification with summary stats
 
 5. Outputs
-- Google Sheet with columns: business info, emails, enriched contacts, ICP score, priority, status
+- Google Sheet: business info, emails, enriched contacts, ICP score, priority, status
 - Slack message: "Query complete: 187 leads, 76 Ready, 45 Needs Review"
 
 6. Rules & Edge Cases
-- If no email found, mark "no email" but keep in dataset for enrichment attempt
+- If no email found, mark "no email" but keep for enrichment attempt
 - If enrichment fails, proceed with qualification using basic data only
 - Fuzzy dedup: 85%+ name similarity + address match = duplicate
 - If >10% scraping errors, pause workflow and alert
@@ -239,28 +305,33 @@ The client receives a qualified lead list in Google Sheets within 2-3 hours of s
 - Rate limiting of 1-2s between requests is sufficient
 
 9. Blockers
-- Need ICP criteria definition from client (business size, decision-maker titles, exclusions)
-- Need example queries for testing (2-3 real queries client would run)
+- Need ICP criteria definition (business size, decision-maker titles, exclusions)
+- Need example queries for testing (2-3 real queries the client would run)
+
+─────────────────────────────────────────────
+NEXT STEP: Run the project initializer
+
+This blueprint is ready for scaffolding. To set up the project structure, say:
+
+  "Set up a new n8n project called acme-lead-generation"
+
+Claude will use n8n-project-init to create the CLAUDE.md, .env, and folder
+structure — then you can hand this blueprint to the n8n builder to implement.
+─────────────────────────────────────────────
 ```
-
----
-
-## Important Notes
-
-- **Always start with fact extraction and questions** - never skip straight to blueprint
-- **Question quality is critical** - focus only on build-blocking unknowns
-- **One page is the goal** - force brevity and clarity
-- **This is for engineers** - write for the person building in n8n, not stakeholders
-- **Use user's exact terminology** - if they say "scrape," use "scrape"; if they say "fetch," use "fetch"
 
 ---
 
 ## Workflow Summary
 
-**User provides transcript**
-→ **You extract facts + unknowns**
-→ **You ask max 8 questions**
-→ **User answers**
-→ **You output one-page blueprint**
+```
+User provides input (transcript, description, or both)
+  → Assess: enough to proceed? If not → ask for more detail
+  → Transcript: extract facts + unknowns
+  → Description: identify gaps directly
+  → Ask up to 10 clarifying questions (AskUserQuestion tool)
+  → User answers
+  → Output one-page blueprint + Next Step callout
+```
 
-Stay focused on this linear process. Do not skip the question step.
+Stay focused on this linear process. Never skip questions. Never generate from thin input.

@@ -17,8 +17,8 @@
     {
       "name": "n8n-prd-generator",
       "source": "./plugins/n8n-prd-generator",
-      "description": "Convert discovery call transcripts into concise n8n Automation Blueprints with interactive question flow",
-      "version": "1.1.0",
+      "description": "Generate n8n Automation Blueprints through collaborative discovery — accepts a call transcript, a workflow description, or both, then asks clarifying questions before producing a build-ready blueprint",
+      "version": "1.2.0",
       "keywords": ["n8n", "blueprint", "prd", "discovery", "automation", "scoping"]
     },
     {
