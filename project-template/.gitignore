@@ -1,0 +1,11 @@
+.env
+.env.*
+!.env.template
+.DS_Store
+Thumbs.db
+.vscode/settings.json
+.idea/
+node_modules/
+*.log
+tmp/
+temp/

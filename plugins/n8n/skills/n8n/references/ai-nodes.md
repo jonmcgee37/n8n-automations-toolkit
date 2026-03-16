@@ -87,7 +87,7 @@ LangChain-powered AI nodes for agents, chat models, embeddings, memory, and vect
     "model": {
       "__rl": true,
       "mode": "id",
-      "value": "claude-sonnet-4-5-20250929"
+      "value": "claude-sonnet-4-6-20250514"
     },
     "options": {
       "temperature": 0.7
@@ -102,12 +102,12 @@ LangChain-powered AI nodes for agents, chat models, embeddings, memory, and vect
 }
 ```
 
-**Available models:**
-- `claude-sonnet-4-5-20250929` - Claude 4.5 Sonnet (latest)
+**Available models (use the latest version available in your n8n instance):**
+- `claude-opus-4-6-20250514` - Claude Opus 4.6
+- `claude-sonnet-4-6-20250514` - Claude Sonnet 4.6
+- `claude-haiku-4-5-20251001` - Claude Haiku 4.5
+- `claude-sonnet-4-5-20250929` - Claude 4.5 Sonnet
 - `claude-3-5-sonnet-20241022` - Claude 3.5 Sonnet
-- `claude-3-opus-20240229` - Claude 3 Opus
-- `claude-3-5-haiku-20241022` - Claude 3.5 Haiku
-- `claude-3-haiku-20240307` - Claude 3 Haiku
 
 ---
 

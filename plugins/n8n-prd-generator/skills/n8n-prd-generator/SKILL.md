@@ -55,6 +55,7 @@ Produce a single, short blueprint that defines:
 - What data it needs and where it comes from
 - The core steps and decisions
 - What it outputs and where it goes
+- A visual workflow diagram (Mermaid) showing the flow at a glance
 - Key edge cases + error handling expectations
 
 ---
@@ -191,29 +192,36 @@ n8n Automation Blueprint — <Client/Project Name>
 - Use clear verbs (Fetch / Validate / Enrich / Decide / Create / Notify / Log)
 - Include decision points inline (IF/ELSE) but keep it short
 
-### 5. Outputs
+### 5. Workflow Diagram
+- Mermaid flowchart (`graph TD`) that mirrors the Core Workflow steps
+- Each node maps 1:1 to a numbered step above
+- Decision points (IF/ELSE, Switch) shown as diamond nodes with labeled branches
+- Error handling branches shown where applicable
+- Keep it clean — no styling overrides, no subgraphs unless the workflow has 3+ distinct branches
+
+### 6. Outputs
 - What gets created/updated/sent
 - Destination system(s)
 - What the user sees (e.g., "Slack message with summary + link")
 
-### 6. Rules & Edge Cases
+### 7. Rules & Edge Cases
 - 5–10 bullets max
 - Include duplicates/idempotency expectation if relevant
 - Include "what happens when data is missing"
 
-### 7. Error Handling & Alerts
+### 8. Error Handling & Alerts
 - What should happen on failure (retry vs stop)
 - Where alerts go (Slack/email) + who receives them (role, not person)
 
-### 8. Assumptions
+### 9. Assumptions
 - Max 5 bullets, only if truly safe to assume
 - Flag anything that needs client confirmation
 
-### 9. Blockers (if any)
+### 10. Blockers (if any)
 - Max 3 bullets
 - Must be actionable (exact missing info / access needed)
 
-### 10. Next Step
+### 11. Next Step
 ```
 ─────────────────────────────────────────────
 NEXT STEP: Run the project initializer
@@ -246,6 +254,7 @@ structure — then you can hand this blueprint to the n8n builder to implement.
 - Ask questions instead of assuming when critical details are unclear
 - Push back and request more detail if input is too vague to produce a quality blueprint
 - Use the user's exact terminology (if they say "scrape," use "scrape")
+- Include a Mermaid workflow diagram that mirrors the Core Workflow steps exactly
 
 ---
 
@@ -281,30 +290,46 @@ submitting a query, with enriched contacts and AI-scored priorities.
 7. Write to Google Sheets with conditional formatting by status
 8. Send Slack notification with summary stats
 
-5. Outputs
+5. Workflow Diagram
+
+```mermaid
+graph TD
+    A[Google Form Submitted] --> B[Scrape Google Maps via Apify]
+    B --> C[Extract & Validate URLs]
+    C --> D[Loop: Scrape Each Site for Emails]
+    D --> E[Batch Enrich via FullEnrich API]
+    E --> F[AI ICP Qualification]
+    F --> G{Error Rate > 10%?}
+    G -- No --> H[Fuzzy Deduplicate]
+    G -- Yes --> I[Pause & Alert Ops via Slack]
+    H --> J[Write to Google Sheets]
+    J --> K[Send Slack Summary]
+```
+
+6. Outputs
 - Google Sheet: business info, emails, enriched contacts, ICP score, priority, status
 - Slack message: "Query complete: 187 leads, 76 Ready, 45 Needs Review"
 
-6. Rules & Edge Cases
+7. Rules & Edge Cases
 - If no email found, mark "no email" but keep for enrichment attempt
 - If enrichment fails, proceed with qualification using basic data only
 - Fuzzy dedup: 85%+ name similarity + address match = duplicate
 - If >10% scraping errors, pause workflow and alert
 - Handle "contact form only" sites by flagging, not failing
 
-7. Error Handling & Alerts
+8. Error Handling & Alerts
 - Transient errors (timeout): retry once after 5s
 - Systematic errors (>20% failure rate): pause and alert technical ops via Slack
 - API failures: log, proceed with degraded data
 - Final failure: email technical ops with execution log link
 
-8. Assumptions
+9. Assumptions
 - Client has FullEnrich API access and budget approved
 - Google Sheets is acceptable output (no CRM required yet)
 - Apify or equivalent scraping service will be used
 - Rate limiting of 1-2s between requests is sufficient
 
-9. Blockers
+10. Blockers
 - Need ICP criteria definition (business size, decision-maker titles, exclusions)
 - Need example queries for testing (2-3 real queries the client would run)
 
@@ -331,7 +356,7 @@ User provides input (transcript, description, or both)
   → Description: identify gaps directly
   → Ask up to 10 clarifying questions (AskUserQuestion tool)
   → User answers
-  → Output one-page blueprint + Next Step callout
+  → Output one-page blueprint with workflow diagram + Next Step callout
 ```
 
 Stay focused on this linear process. Never skip questions. Never generate from thin input.

@@ -1,4 +1,4 @@
-# AI Automations Team Setup Guide
+# n8n Automations Toolkit — Setup Guide
 
 Follow these steps exactly. The whole process takes about 10 minutes.
 
@@ -26,7 +26,7 @@ You will receive three values from Jon:
 Open **Terminal** on your Mac and run this command:
 
 ```bash
-cat > ~/.n8n-team.env << 'EOF'
+cat > ~/.n8n.env << 'EOF'
 N8N_API_URL=PASTE_THE_URL_HERE
 N8N_API_KEY=PASTE_THE_API_KEY_HERE
 N8N_CREDENTIALS_TEMPLATE_URL=PASTE_THE_TEMPLATE_URL_HERE
@@ -38,7 +38,7 @@ EOF
 To verify it saved correctly:
 
 ```bash
-cat ~/.n8n-team.env
+cat ~/.n8n.env
 ```
 
 You should see your three values printed out. If it looks right, move on.
@@ -128,7 +128,7 @@ Set up a new n8n project called test-verification
 ```
 
 Claude should:
-1. Find your credentials from `~/.n8n-team.env`
+1. Find your credentials from `~/.n8n.env`
 2. Ask you for project details (name, description, stakeholder)
 3. Create a folder with CLAUDE.md, .env, and .gitignore
 4. Verify the API connection to the n8n instance
@@ -220,7 +220,7 @@ You are running the command in your regular terminal, not inside Claude Code. Ty
 Check that your credentials file exists and has values:
 
 ```bash
-cat ~/.n8n-team.env
+cat ~/.n8n.env
 ```
 
 If it is empty or missing, go back to Step 1.
@@ -242,7 +242,7 @@ Make sure you ran `/plugin install`, not just `/plugin marketplace add`. The mar
 
 ---
 
-## Team Conventions
+## Conventions
 
 - **Project naming:** kebab-case, descriptive (e.g., `hubspot-lead-scoring`, `slack-approval-workflow`)
 - **Always start with a blueprint** from a stakeholder conversation before building
@@ -276,11 +276,3 @@ To save it so you do not have to enter it every time:
 git config --global credential.helper osxkeychain
 ```
 
----
-
-## Appendix B: Version History
-
-| Version | Date | Changes |
-|---------|------|---------|
-| 1.1.0 | 2025-02-19 | Added multi-instance credential support, fixed cache refresh, improved credential detection |
-| 1.0.0 | 2025-02-19 | Initial release -- n8n build plugin, PRD generator, project initializer |

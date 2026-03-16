@@ -28,7 +28,7 @@ Scaffold a new n8n automation project for the Pattern AI Automations team. This 
 Run this command to check for the team credentials file:
 
 ```bash
-cat ~/.n8n-team.env 2>/dev/null
+cat ~/.n8n.env 2>/dev/null
 ```
 
 **If the file exists and contains values:**
@@ -39,12 +39,12 @@ cat ~/.n8n-team.env 2>/dev/null
 **If the file is missing or empty:**
 - Stop immediately and tell the user:
 
-> "Your Pattern credentials file (`~/.n8n-team.env`) is missing or empty. Before initializing a project, you need to set this up.
+> "Your Pattern credentials file (`~/.n8n.env`) is missing or empty. Before initializing a project, you need to set this up.
 >
 > Ask Jon for the three credential values (N8N_API_URL, N8N_API_KEY, N8N_CREDENTIALS_TEMPLATE_URL), then run:
 >
 > ```bash
-> cat > ~/.n8n-team.env << 'EOF'
+> cat > ~/.n8n.env << 'EOF'
 > N8N_API_URL=https://pattern.app.n8n.cloud
 > N8N_API_KEY=PASTE_YOUR_KEY_HERE
 > N8N_CREDENTIALS_TEMPLATE_URL=PASTE_TEMPLATE_URL_HERE
@@ -149,8 +149,8 @@ Write the Pattern credentials into the project `.env`:
 # ============================================
 
 N8N_API_URL=https://pattern.app.n8n.cloud
-N8N_API_KEY=<value from ~/.n8n-team.env>
-N8N_CREDENTIALS_TEMPLATE_URL=<value from ~/.n8n-team.env>
+N8N_API_KEY=<value from ~/.n8n.env>
+N8N_CREDENTIALS_TEMPLATE_URL=<value from ~/.n8n.env>
 
 # ============================================
 # Project-Specific Variables (add as needed)
@@ -172,7 +172,7 @@ Create CLAUDE.md with all placeholders replaced:
 | `{{TEAM_MEMBER_NAME}}` | Builder name from Step 3 |
 | `{{STAKEHOLDER_NAME}}` | Stakeholder name from Step 3 |
 | `{{STAKEHOLDER_TEAM}}` | Stakeholder team from Step 3 |
-| `{{N8N_CREDENTIALS_TEMPLATE_URL}}` | From `~/.n8n-team.env` |
+| `{{N8N_CREDENTIALS_TEMPLATE_URL}}` | From `~/.n8n.env` |
 
 **If a blueprint was provided in Step 2:** paste it verbatim into the "Blueprint Reference" section.
 **If not:** leave the section with the placeholder note.
@@ -188,7 +188,7 @@ curl -s "${N8N_API_URL}/api/v1/workflows?limit=1" \
 ```
 
 - Returns a number → connection confirmed
-- Fails → help troubleshoot: confirm URL is `https://pattern.app.n8n.cloud`, verify API key matches `~/.n8n-team.env`, check network
+- Fails → help troubleshoot: confirm URL is `https://pattern.app.n8n.cloud`, verify API key matches `~/.n8n.env`, check network
 
 ---
 
