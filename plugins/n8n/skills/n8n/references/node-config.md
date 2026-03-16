@@ -35,7 +35,7 @@ Common node configurations and workflow patterns.
 ```json
 {
   "type": "n8n-nodes-base.httpRequest",
-  "typeVersion": 4.2,
+  "typeVersion": 4.4,
   "parameters": {
     "method": "POST",
     "url": "https://api.example.com/endpoint",
@@ -86,13 +86,14 @@ Common node configurations and workflow patterns.
 ```json
 {
   "type": "n8n-nodes-base.if",
-  "typeVersion": 2,
+  "typeVersion": 2.2,
   "parameters": {
     "conditions": {
       "options": {
         "caseSensitive": true,
         "leftValue": "",
-        "typeValidation": "strict"
+        "typeValidation": "strict",
+        "version": 2
       },
       "conditions": [
         {
@@ -115,11 +116,11 @@ Common node configurations and workflow patterns.
 ```json
 {
   "type": "n8n-nodes-base.switch",
-  "typeVersion": 3,
+  "typeVersion": 3.2,
   "parameters": {
     "mode": "rules",
     "rules": {
-      "rules": [
+      "values": [
         {
           "outputKey": "high",
           "conditions": {

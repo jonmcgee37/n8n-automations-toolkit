@@ -17,6 +17,19 @@ After pushing, team members should run:
 
 ---
 
+## [1.2.0] - 2025-03-16
+
+### Changed
+- **n8n**: Blueprint-first build process — reads CLAUDE.md blueprint as primary build spec, added pipeline context (Step 3 of 3), error handling setup prompt after every build
+- **n8n-prd-generator**: Flexible input — accepts call transcripts, workflow descriptions, or both; collaborative discovery with clarifying questions before producing blueprint
+- **n8n-project-init**: Pattern-only configuration, blueprint-first flow (checks for existing blueprint before scaffolding), streamlined 3-step pipeline handoff
+
+### Docs
+- Standardized documentation, credentials references, and blueprint output format across all plugins
+- Updated README with correct GitHub org references
+
+---
+
 ## [1.1.0] - 2025-02-19
 
 ### Changed
@@ -29,7 +42,6 @@ After pushing, team members should run:
 ### Docs
 - Rewrote setup.md with detailed step-by-step instructions
 - Added Appendix A (GitHub Personal Access Token setup)
-- Added Appendix B (Version History)
 - Added CHANGELOG.md for version tracking
 
 ---

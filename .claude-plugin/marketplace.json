@@ -1,7 +1,7 @@
 {
   "name": "n8n-toolkit",
   "owner": {
-    "name": "pattern-ai-automations"
+    "name": "jonmcgee37"
   },
   "metadata": {
     "description": "Pattern AI Automations team toolkit -- build, test, plan, and scaffold n8n workflows"

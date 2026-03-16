@@ -36,15 +36,13 @@ Every team member runs these steps once to get the toolkit installed.
 
 ```bash
 # In Claude Code (terminal or VS Code), run:
-/plugin marketplace add pattern-ai/n8n-automations-toolkit
+/plugin marketplace add jonmcgee37/n8n-automations-toolkit
 ```
-
-Replace `pattern-ai/n8n-automations-toolkit` with the actual GitHub org/repo path once published.
 
 If using a local clone instead of GitHub:
 
 ```bash
-git clone git@github.com:pattern-ai/n8n-automations-toolkit.git ~/claude-plugins/n8n-toolkit
+git clone git@github.com:jonmcgee37/n8n-automations-toolkit.git ~/claude-plugins/n8n-toolkit
 /plugin marketplace add ~/claude-plugins/n8n-toolkit
 ```
 
@@ -57,8 +55,6 @@ git clone git@github.com:pattern-ai/n8n-automations-toolkit.git ~/claude-plugins
 ```
 
 ### Step 3: Set Up n8n Credentials
-
-**Single instance (most team members):**
 
 Create a file at `~/.n8n.env` with the shared instance credentials:
 
@@ -145,6 +141,7 @@ git pull
 n8n-automations-toolkit/
 ├── .claude-plugin/
 │   └── marketplace.json          ← Plugin registry
+├── .gitignore                    ← Repo-level ignore rules
 ├── plugins/
 │   ├── n8n/                      ← Core build & test skill
 │   │   ├── .claude-plugin/plugin.json
