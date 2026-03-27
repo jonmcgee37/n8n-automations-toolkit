@@ -190,22 +190,25 @@ Claude will build the workflow node by node, testing after each step.
 
 ---
 
-## How to Update the Plugins
+## How Plugins Stay Updated
 
-When Jon announces an update, open Claude Code and run:
+Plugins **auto-update on every session start**. Each plugin includes a hook that pulls the latest skill files from GitHub when you open Claude Code. You will see a message like:
+
+```
+[n8n-toolkit] n8n skills updated to latest
+```
+
+No manual action is needed for day-to-day updates.
+
+**If you need to force a full reinstall** (rare — only if plugin metadata like name or version changes):
 
 ```
 /plugin marketplace update n8n-toolkit
-```
-
-Then uninstall and reinstall any plugins that changed:
-
-```
 /plugin uninstall n8n-project-init@n8n-toolkit
 /plugin install n8n-project-init@n8n-toolkit
 ```
 
-Select "user scope" again. This ensures the updated version replaces the cached copy.
+Select "user scope" again.
 
 ---
 
